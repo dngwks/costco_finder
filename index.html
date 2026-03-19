@@ -66,8 +66,10 @@
                 item.className = 'store-item';
                 item.innerHTML = `
     <div class="store-whs">WHS #${store['WHS']}</div>
-    <a href="https://www.google.com/maps/search/Costco+${store['WHS NAME']}" target="_blank" style="text-decoration:none; color:inherit;">
-        <div class="store-name">${store['WHS NAME']} 📍</div>
+    <a href="https://www.google.com/maps/search/Costco+${encodeURIComponent(store['WHS NAME'])}" target="_blank" style="text-decoration:none; color:inherit;">
+        <div class="store-name" style="cursor:pointer; color:#005691; text-decoration:underline;">
+            ${store['WHS NAME']} 📍
+        </div>
     </a>
 `;
                 resultArea.appendChild(item);
