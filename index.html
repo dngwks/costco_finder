@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Costco Store Search</title>
+    <style>
+        body { font-family: sans-serif; margin: 0; padding: 20px; background-color: #ffffff; color: #333; }
+        .container { max-width: 500px; margin: 0 auto; text-align: center; }
+        h1 { color: #005691; margin-bottom: 20px; }
+        #search-box { display: flex; gap: 5px; margin-bottom: 30px; }
+        input { flex: 1; padding: 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; }
+        button { padding: 12px 20px; background-color: #e31d2b; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; }
+        #resultArea { text-align: left; }
+        .store-item { padding: 15px; border-bottom: 1px solid #eee; }
+        .store-whs { font-size: 12px; color: #888; }
+        .store-name { font-size: 16px; font-weight: bold; margin-top: 3px; }
+        .no-data { padding: 50px; color: #999; text-align: center; border: 1px dashed #ccc; border-radius: 8px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Costco Store Locator</h1>
+
+    <div id="search-box">
+        <input type="text" id="searchInput" placeholder="Enter City or State (e.g. CA)">
+        <button onclick="searchStore()">Search</button>
+    </div>
+
+    <div id="resultArea"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+<script>
+    // ★ Replace this URL with your Google Sheets CSV Link
+    const sheetCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRjHh7c67-QQT9fKN2ZV5E2jsF7Ge2NpC3hMEc9b-xiRxZuUBJ32ttrC7vpMxv5aNqTVHqYsJ4VMFTV/pub?gid=0&single=true&output=csv'; 
+    
+    let storeData = [];
+
+    window.onload = function() {
+        if (!sheetCsvUrl.includes('docs.google.com')) return;
+        Papa.parse(sheetCsvUrl, {
+            download: true, header: true,
+            complete: function(results) {
+                storeData = results.data;
+            }
+        });
+    };
+
+    function searchStore() {
+        const query = document.getElementById('searchInput').value.trim().toUpperCase();
+        const resultArea = document.getElementById('resultArea');
+        resultArea.innerHTML = '';
+
+        if (!query) return;
+
+        const filtered = storeData.filter(store => {
+            const name = store['WHS NAME'] ? store['WHS NAME'].toUpperCase() : '';
+            return name.includes(query);
+        });
+
+        if (filtered.length > 0) {
+            filtered.forEach(store => {
+                const item = document.createElement('div');
+                item.className = 'store-item';
+                item.innerHTML = `
+                    <div class="store-whs">WHS #${store['WHS']}</div>
+                    <div class="store-name">${store['WHS NAME']}</div>
+                `;
+                resultArea.appendChild(item);
+            });
+        } else {
+            resultArea.innerHTML = '<div class="no-data">No data found for this location.</div>';
+        }
+    }
+
+    document.getElementById('searchInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') searchStore(); });
+</script>
+
+</body>
+</html>
